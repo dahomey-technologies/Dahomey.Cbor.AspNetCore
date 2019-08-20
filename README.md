@@ -1,6 +1,12 @@
 # Dahomey.Cbor.AspNetCore
 Asp.Net Core Support for [Dahomey.Cbor](https://github.com/dahomey-technologies/Dahomey.Cbor)
 
+![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Dahomey.Cbor.AspNetCore)
+![CircleCI](https://img.shields.io/circleci/build/github/dahomey-technologies/Dahomey.Cbor.AspNetCore/master)
+
+## Features
+* Asp.net core 2.1 and 2.2 CBOR formatters
+
 ## Output/Input formatters
 You can enable [Dahomey.Cbor](https://github.com/dahomey-technologies/Dahomey.Cbor) as a CBOR formatter in ASP.NET Core 2.1 or 2.2 by using the Nuget package [Dahomey.Cbor.AspNetCore](https://www.nuget.org/packages/Dahomey.Cbor.AspNetCore/). To enable it, add the extension method ``AddDahomeyCbor()`` to the ``AddMvc()`` call in ``ConfigureServices``
 
