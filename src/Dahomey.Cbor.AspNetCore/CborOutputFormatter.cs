@@ -13,7 +13,7 @@ namespace Dahomey.Cbor.AspNetCore
 
         public CborOutputFormatter(CborOptions cborOptions)
         {
-            _cborOptions = cborOptions;
+            _cborOptions = cborOptions ?? CborOptions.Default;
 
             SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/cbor"));
         }
@@ -23,7 +23,7 @@ namespace Dahomey.Cbor.AspNetCore
             using (ByteBufferWriter bufferWriter = new ByteBufferWriter())
             {
                 CborWriter writer = new CborWriter(bufferWriter, _cborOptions);
-                ICborConverter cborConverter = CborConverter.Lookup(context.Object.GetType());
+                ICborConverter cborConverter = _cborOptions.Registry.ConverterRegistry.Lookup(context.Object.GetType());
                 cborConverter.Write(ref writer, context.Object);
                 return bufferWriter.CopyToAsync(context.HttpContext.Response.Body);
             }

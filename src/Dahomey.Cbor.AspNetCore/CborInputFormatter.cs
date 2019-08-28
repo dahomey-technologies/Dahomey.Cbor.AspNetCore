@@ -17,7 +17,7 @@ namespace Dahomey.Cbor.AspNetCore
 
         public CborInputFormatter(CborOptions cborOptions)
         {
-            _cborOptions = cborOptions;
+            _cborOptions = cborOptions ?? CborOptions.Default;
 
             SupportedMediaTypes.Add("application/cbor");
         }
@@ -58,7 +58,7 @@ namespace Dahomey.Cbor.AspNetCore
         private object Deserialize(Type objectType, ReadOnlySpan<byte> buffer)
         {
             CborReader reader = new CborReader(buffer, _cborOptions);
-            ICborConverter cborConverter = CborConverter.Lookup(objectType);
+            ICborConverter cborConverter = _cborOptions.Registry.ConverterRegistry.Lookup(objectType);
             return cborConverter.Read(ref reader);
 
         }
