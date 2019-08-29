@@ -21,7 +21,7 @@
 
   <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.App" />
-      <PackageReference Include="Dahomey.Cbor" Version="1.2.1" />
+      <PackageReference Include="Dahomey.Cbor" Version="1.2.2" />
   </ItemGroup>
 
 </Project>
