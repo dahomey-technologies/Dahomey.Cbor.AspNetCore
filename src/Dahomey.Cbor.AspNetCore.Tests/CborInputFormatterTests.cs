@@ -3,19 +3,18 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Dahomey.Cbor.AspNetCore.Tests
 {
-    [TestClass]
     public class CborInputFormatterTests
     {
-        [TestMethod]
+        [Fact]
         public async Task ReadSimpleObject()
         {
             const string hexBuffer = "AE67426F6F6C65616EF56553427974650D64427974650C65496E7431360E6655496E7431360F65496E743332106655496E7433321165496E743634126655496E7436341366537472696E6766737472696E676653696E676C65FA41A1AE1466446F75626C65FB40363AE147AE147B684461746554696D6574323031342D30322D32315431393A30303A30305A64456E756D6656616C756531";
@@ -42,35 +41,35 @@ namespace Dahomey.Cbor.AspNetCore.Tests
 
             IInputFormatter inputFormatter = new CborInputFormatter(null);
 
-            Assert.IsTrue(inputFormatter.CanRead(context));
+            Assert.True(inputFormatter.CanRead(context));
 
             InputFormatterResult result = await inputFormatter.ReadAsync(context);
 
-            Assert.IsFalse(result.HasError);
-            Assert.IsTrue(result.IsModelSet);
+            Assert.False(result.HasError);
+            Assert.True(result.IsModelSet);
 
             SimpleObject obj = (SimpleObject)result.Model;
 
-            Assert.IsNotNull(obj);
-            Assert.IsTrue(obj.Boolean);
-            Assert.AreEqual(12, obj.Byte);
-            Assert.AreEqual(13, obj.SByte);
-            Assert.AreEqual(14, obj.Int16);
-            Assert.AreEqual(15, obj.UInt16);
-            Assert.AreEqual(16, obj.Int32);
-            Assert.AreEqual(17u, obj.UInt32);
-            Assert.AreEqual(18, obj.Int64);
-            Assert.AreEqual(19ul, obj.UInt64);
-            Assert.AreEqual(20.21f, obj.Single);
-            Assert.AreEqual(22.23, obj.Double);
-            Assert.AreEqual("string", obj.String);
-            Assert.AreEqual(new DateTime(2014, 02, 21, 19, 0, 0, DateTimeKind.Utc), obj.DateTime);
-            Assert.AreEqual(EnumTest.Value1, obj.Enum);
+            Assert.NotNull(obj);
+            Assert.True(obj.Boolean);
+            Assert.Equal(12, obj.Byte);
+            Assert.Equal(13, obj.SByte);
+            Assert.Equal(14, obj.Int16);
+            Assert.Equal(15, obj.UInt16);
+            Assert.Equal(16, obj.Int32);
+            Assert.Equal(17u, obj.UInt32);
+            Assert.Equal(18, obj.Int64);
+            Assert.Equal(19ul, obj.UInt64);
+            Assert.Equal(20.21f, obj.Single);
+            Assert.Equal(22.23, obj.Double);
+            Assert.Equal("string", obj.String);
+            Assert.Equal(new DateTime(2014, 02, 21, 19, 0, 0, DateTimeKind.Utc), obj.DateTime);
+            Assert.Equal(EnumTest.Value1, obj.Enum);
         }
 
-        [DataTestMethod]
-        [DataRow("application/json", "")]
-        [DataRow("application/cbor", "application/cbor")]
+        [Theory]
+        [InlineData("application/json", "")]
+        [InlineData("application/cbor", "application/cbor")]
         public void GetSupportedContentTypes(string actualContentType, string expectedContentType)
         {
             IApiRequestFormatMetadataProvider apiRequestFormatMetadataProvider = new CborInputFormatter(null);
@@ -80,12 +79,12 @@ namespace Dahomey.Cbor.AspNetCore.Tests
 
             if (string.IsNullOrEmpty(expectedContentType))
             {
-                Assert.IsNull(contentTypes);
+                Assert.Null(contentTypes);
             }
             else
             {
-                Assert.AreEqual(1, contentTypes.Count);
-                Assert.AreEqual(expectedContentType, contentTypes[0]);
+                Assert.Equal(1, contentTypes.Count);
+                Assert.Equal(expectedContentType, contentTypes[0]);
             }
         }
     }

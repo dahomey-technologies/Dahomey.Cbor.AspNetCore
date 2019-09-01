@@ -2,18 +2,17 @@
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Metadata;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Dahomey.Cbor.AspNetCore.Tests
 {
-    [TestClass]
     public class CborOuputFormatterTests
     {
-        [TestMethod]
+        [Fact]
         public async Task WriteSimpleObject()
         {
             SimpleObject obj = new SimpleObject
@@ -61,12 +60,12 @@ namespace Dahomey.Cbor.AspNetCore.Tests
                     EnumFormat = ValueFormat.WriteToString
                 });
 
-            Assert.IsTrue(outputFormatter.CanWriteResult(context));
+            Assert.True(outputFormatter.CanWriteResult(context));
 
             await outputFormatter.WriteAsync(context);
 
             string actualHexBuffer = BitConverter.ToString(body.ToArray()).Replace("-", "");
-            Assert.AreEqual(hexBuffer, actualHexBuffer);
+            Assert.Equal(hexBuffer, actualHexBuffer);
         }
     }
 }
