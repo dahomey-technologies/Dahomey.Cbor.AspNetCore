@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/dahomey-technologies/Dahomey.Cbor.git</RepositoryUrl>
     <PackageTags>aspnetcore;aspnetcoremvc;cbor</PackageTags>
     <RepositoryType>Git</RepositoryType>
-    <PackageReleaseNotes>cf. https://github.com/dahomey-technologies/Dahomey.Cbor/releases/tag/$(Version)</PackageReleaseNotes>
+    <PackageReleaseNotes>cf. https://github.com/dahomey-technologies/Dahomey.Cbor.AspNetCore/releases/tag/$(Version)</PackageReleaseNotes>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -21,7 +21,7 @@
 
   <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.App" />
-      <PackageReference Include="Dahomey.Cbor" Version="1.3.2" />
+      <PackageReference Include="Dahomey.Cbor" Version="1.4.0" />
   </ItemGroup>
 
 </Project>
