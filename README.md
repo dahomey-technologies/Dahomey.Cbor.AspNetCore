@@ -2,7 +2,7 @@
 Asp.Net Core Support for [Dahomey.Cbor](https://github.com/dahomey-technologies/Dahomey.Cbor)
 
 ![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Dahomey.Cbor.AspNetCore)
-![CircleCI](https://img.shields.io/circleci/build/github/dahomey-technologies/Dahomey.Cbor.AspNetCore/master)
+![](https://github.com/dahomey-technologies/Dahomey.Cbor.AspNetCore/workflows/Build%20and%20Test/badge.svg)
 
 ## Features
 * Asp.net core 2.1 and 2.2 CBOR formatters
