@@ -5,14 +5,18 @@ on:
     paths:
       - 'src/**'
       - '.github/workflows/**'
-    tags-ignore: 
-      - '*'
+    branches:
+      - '**'
+    tags-ignore:
+      - '*.*.*'
   pull_request:    
     paths:
       - 'src/**'
       - '.github/workflows/**'
-    tags-ignore: 
-      - '*'
+    branches:
+      - '**'
+    tags-ignore:
+      - '*.*.*'
 jobs:
   build:
 
