@@ -1,8 +1,6 @@
-﻿using Dahomey.Cbor.Serialization;
-using Dahomey.Cbor.Serialization.Converters;
-using Dahomey.Cbor.Util;
-using Microsoft.AspNetCore.Mvc.Formatters;
+﻿using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Net.Http.Headers;
+using System.IO.Pipelines;
 using System.Threading.Tasks;
 
 namespace Dahomey.Cbor.AspNetCore
@@ -20,13 +18,39 @@ namespace Dahomey.Cbor.AspNetCore
 
         public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context)
         {
-            using (ByteBufferWriter bufferWriter = new ByteBufferWriter())
+#if (NETCOREAPP2_1 || NETCOREAPP2_2)
+            return Cbor.SerializeAsync(context.Object, context.ObjectType, context.HttpContext.Response.Body, _cborOptions);
+#else
+            PipeWriter writer = context.HttpContext.Response.BodyWriter;
+            Cbor.Serialize(context.Object, context.ObjectType, writer, _cborOptions);
+
+            ValueTask<FlushResult> flushTask = writer.FlushAsync();
+
+            if (flushTask.IsCompleted)
             {
-                CborWriter writer = new CborWriter(bufferWriter, _cborOptions);
-                ICborConverter cborConverter = _cborOptions.Registry.ConverterRegistry.Lookup(context.Object.GetType());
-                cborConverter.Write(ref writer, context.Object);
-                return bufferWriter.CopyToAsync(context.HttpContext.Response.Body);
+                ValueTask completeTask = writer.CompleteAsync();
+
+                if (completeTask.IsCompleted)
+                {
+                    return Task.CompletedTask;
+                }
+
+                return FinishCompleteAsync(completeTask);
             }
+
+            return FinishFlushAsync(flushTask);
+
+            async Task FinishFlushAsync(ValueTask<FlushResult> localFlushTask)
+            {
+                await localFlushTask.ConfigureAwait(false);
+                await writer.CompleteAsync();
+            }
+
+            async Task FinishCompleteAsync(ValueTask localCompleteTask)
+            {
+                await localCompleteTask.ConfigureAwait(false);
+            }
+#endif
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1;netcoreapp2.2;netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
     <Version>1.0.0</Version>
     <Authors>Michaël Catanzariti</Authors>
     <Description>ASP.NET Core MVC features that use Dahomey.Cbor. Includes input and output formatters for CBOR</Description>
@@ -19,9 +19,16 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'netcoreapp2.2'">
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' OR '$(TargetFramework)' == 'netcoreapp3.1'">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
   <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.App" />
-      <PackageReference Include="Dahomey.Cbor" Version="1.7.2" />
+    <PackageReference Include="Dahomey.Cbor" Version="1.10.0" />
   </ItemGroup>
 
 </Project>

@@ -1,9 +1,5 @@
-﻿using Dahomey.Cbor.Serialization;
-using Dahomey.Cbor.Serialization.Converters;
-using Microsoft.AspNetCore.Mvc.Formatters;
+﻿using Microsoft.AspNetCore.Mvc.Formatters;
 using System;
-using System.Buffers;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Dahomey.Cbor.AspNetCore
@@ -26,17 +22,17 @@ namespace Dahomey.Cbor.AspNetCore
         {
             try
             {
-                ValueTask<IMemoryOwner<byte>> task = ReadAsync(context.HttpContext.Request.Body);
-                if (task.IsCompletedSuccessfully)
+#if (NETCOREAPP2_1 || NETCOREAPP2_2)
+                ValueTask<object> task = Cbor.DeserializeAsync(context.ModelType, context.HttpContext.Request.Body, _cborOptions);
+#else
+                ValueTask<object> task = Cbor.DeserializeAsync(context.ModelType, context.HttpContext.Request.BodyReader, _cborOptions);
+#endif
+                if (task.IsCompleted)
                 {
-                    using (task.Result)
-                    {
-                        object model = Deserialize(context.ModelType, task.Result.Memory.Span);
-                        return Task.FromResult(InputFormatterResult.Success(model));
-                    }
+                    return InputFormatterResult.SuccessAsync(task.Result);
                 }
 
-                return FinishReadRequestBodyAsync(context.ModelType, task);
+                return FinishReadRequestBodyAsync(task);
             }
             catch (Exception ex)
             {
@@ -44,44 +40,11 @@ namespace Dahomey.Cbor.AspNetCore
                 return failureTask;
             }
 
-            async Task<InputFormatterResult> FinishReadRequestBodyAsync(Type objectType, ValueTask<IMemoryOwner<byte>> task)
+            async Task<InputFormatterResult> FinishReadRequestBodyAsync(ValueTask<object> localTask)
             {
-                await task;
-                using (task.Result)
-                {
-                    object model = Deserialize(objectType, task.Result.Memory.Span);
-                    return InputFormatterResult.Success(model);
-                }
+                object result = await localTask.ConfigureAwait(false);
+                return InputFormatterResult.Success(result);
             }
-        }
-
-        private object Deserialize(Type objectType, ReadOnlySpan<byte> buffer)
-        {
-            CborReader reader = new CborReader(buffer, _cborOptions);
-            ICborConverter cborConverter = _cborOptions.Registry.ConverterRegistry.Lookup(objectType);
-            return cborConverter.Read(ref reader);
-
-        }
-
-        private async ValueTask<IMemoryOwner<byte>> ReadAsync(Stream stream)
-        {
-            var totalSize = 0;
-            IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent();
-            int read;
-            while ((read = await stream.ReadAsync(buffer.Memory)) > 0)
-            {
-                if (totalSize + read == buffer.Memory.Length)
-                {
-                    IMemoryOwner<byte> backup = buffer;
-                    buffer = MemoryPool<byte>.Shared.Rent(backup.Memory.Length * 2);
-                    backup.Memory.Span.CopyTo(buffer.Memory.Span);
-                    backup.Dispose();
-                }
-
-                totalSize += read;
-            }
-
-            return buffer;
         }
     }
 }

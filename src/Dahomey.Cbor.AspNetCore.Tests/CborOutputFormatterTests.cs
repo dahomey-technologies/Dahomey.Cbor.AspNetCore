@@ -8,6 +8,10 @@ using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
+#if (NETCOREAPP3_0 || NETCOREAPP3_1)
+using System.IO.Pipelines;
+#endif
+
 namespace Dahomey.Cbor.AspNetCore.Tests
 {
     public class CborOuputFormatterTests
@@ -26,20 +30,24 @@ namespace Dahomey.Cbor.AspNetCore.Tests
                 UInt32 = 17u,
                 Int64 = 18,
                 UInt64 = 19ul,
-                Single = 20.21f,
+                Single = 20.25f,
                 Double = 22.23,
                 String = "string",
                 DateTime = new DateTime(2014, 02, 21, 19, 0, 0, DateTimeKind.Utc),
                 Enum = EnumTest.Value1
             };
 
-            const string hexBuffer = "AE67426F6F6C65616EF56553427974650D64427974650C65496E7431360E6655496E7431360F65496E743332106655496E7433321165496E743634126655496E7436341366537472696E6766737472696E676653696E676C65FA41A1AE1466446F75626C65FB40363AE147AE147B684461746554696D6574323031342D30322D32315431393A30303A30305A64456E756D6656616C756531";
+            const string hexBuffer = "AE67426F6F6C65616EF56553427974650D64427974650C65496E7431360E6655496E7431360F65496E743332106655496E7433321165496E743634126655496E7436341366537472696E6766737472696E676653696E676C65FA41A2000066446F75626C65FB40363AE147AE147B684461746554696D6574323031342D30322D32315431393A30303A30305A64456E756D6656616C756531";
             byte[] buffer = hexBuffer.HexToBytes();
-            MemoryStream body = new MemoryStream(); ;
+            MemoryStream body = new MemoryStream();
 
             Mock<HttpResponse> httpResponse = new Mock<HttpResponse>(MockBehavior.Strict);
             httpResponse.SetupSet(r => r.ContentType = "application/cbor");
             httpResponse.Setup(r => r.Body).Returns(body);
+#if (NETCOREAPP3_0 || NETCOREAPP3_1)
+            Pipe pipe = new Pipe();
+            httpResponse.Setup(r => r.BodyWriter).Returns(pipe.Writer);
+#endif
 
             Mock<HttpContext> httpContext = new Mock<HttpContext>(MockBehavior.Strict);
             httpContext.Setup(c => c.Response).Returns(httpResponse.Object);
@@ -64,6 +72,9 @@ namespace Dahomey.Cbor.AspNetCore.Tests
 
             await outputFormatter.WriteAsync(context);
 
+#if (NETCOREAPP3_0 || NETCOREAPP3_1)
+            await pipe.Reader.CopyToAsync(body);
+#endif
             string actualHexBuffer = BitConverter.ToString(body.ToArray()).Replace("-", "");
             Assert.Equal(hexBuffer, actualHexBuffer);
         }

@@ -10,6 +10,10 @@ using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 
+#if (NETCOREAPP3_0 || NETCOREAPP3_1)
+using System.IO.Pipelines;
+#endif
+
 namespace Dahomey.Cbor.AspNetCore.Tests
 {
     public class CborInputFormatterTests
@@ -24,8 +28,23 @@ namespace Dahomey.Cbor.AspNetCore.Tests
             httpRequest.Setup(r => r.ContentType).Returns("application/cbor");
             httpRequest.Setup(r => r.ContentLength).Returns(buffer.Length);
             httpRequest.Setup(r => r.Body).Returns(new MemoryStream(buffer));
+#if (NETCOREAPP3_0 || NETCOREAPP3_1)
+            httpRequest.Setup(r => r.BodyReader).Returns(await CreatePipeReader());
 
-            Mock<HttpContext> httpContext = new Mock<HttpContext>(MockBehavior.Strict);
+            async Task<PipeReader> CreatePipeReader()
+            {
+                Pipe pipe = new Pipe();
+                Memory<byte> writeBuffer = pipe.Writer.GetMemory(buffer.Length);
+                buffer.CopyTo(writeBuffer);
+                pipe.Writer.Advance(buffer.Length);
+                await pipe.Writer.FlushAsync();
+                await pipe.Writer.CompleteAsync();
+
+                return pipe.Reader;
+            }
+#endif
+
+                Mock<HttpContext> httpContext = new Mock<HttpContext>(MockBehavior.Strict);
             httpContext.Setup(c => c.Request).Returns(httpRequest.Object);
 
             Mock<ModelMetadata> modelMetadata = new Mock<ModelMetadata>(
