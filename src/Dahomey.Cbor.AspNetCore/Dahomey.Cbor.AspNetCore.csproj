@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dahomey.Cbor" Version="1.10.0" />
+    <PackageReference Include="Dahomey.Cbor" Version="1.10.3" />
   </ItemGroup>
 
 </Project>
